@@ -20,6 +20,9 @@ app.use(cors(corsOptions));
 
 // mount api v1 routes
 app.use('/v1', routes);
+app.use('/', function(req, res, next) {
+  res.send('<h1>Application Backend!</h1>');
+});
 
 
 module.exports = app;
