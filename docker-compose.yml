@@ -1,0 +1,52 @@
+version: "3"
+
+# Define the services for the app
+services:      
+  # backend service serves the backend of the application
+  backend:
+    #build the images (if not present already) before starting the app
+    build: 
+      dockerfile: Dockerfile
+      context: ./../devops-todos
+    restart: always
+    depends_on:
+      - mongo
+    env_file: ./.env
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      NODE_ENV: ${NODE_ENV}
+      TODO_PORT: ${TODO_PORT}
+    ports:
+      - "8080:8080"
+    networks:
+      - frontendTodo
+      - backendTodo
+    #in order to reflect the code changes into the docker server
+    volumes:
+      - ./../devops-todos:/app/
+      - /app/node_modules
+    links:
+      - mongo
+  #database service to store the databae of the application
+  mongo:
+    image: mongo
+    restart: always
+    env_file: ./.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    #persist the data of the application when the container is down
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - backendTodo
+
+networks:
+  frontendTodo:
+    name: frontendTodo
+  
+  backendTodo:
+    name: backendTodo
+
+volumes:
+    mongodb:
