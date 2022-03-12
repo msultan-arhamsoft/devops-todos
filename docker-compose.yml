@@ -4,10 +4,7 @@ version: "3"
 services:      
   # backend service serves the backend of the application
   backend:
-    #build the images (if not present already) before starting the app
-    build: 
-      dockerfile: Dockerfile
-      context: ./../devops-todos
+    image: mahmoodsultan/devops-backend:phase1
     restart: always
     depends_on:
       - mongo
