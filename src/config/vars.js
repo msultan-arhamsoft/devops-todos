@@ -3,7 +3,7 @@ const path = require('path');
 require('dotenv').config();
 module.exports = {
   env: process.env.NODE_ENV,
-  port: process.env.PORT,
+  port: process.env.TODO_PORT,
   mongo: {
     uri: process.env.MONGO_URI,
   }
