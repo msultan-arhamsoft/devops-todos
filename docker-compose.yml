@@ -16,8 +16,8 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - frontendTodo
-      - backendTodo
+      - frontend-todo
+      - backend-todo
     #in order to reflect the code changes into the docker server
     volumes:
       - ./../devops-todos:/app/
@@ -36,14 +36,14 @@ services:
     volumes:
       - mongodb:/data/db
     networks:
-      - backendTodo
+      - backend-todo
 
 networks:
-  frontendTodo:
-    name: frontendTodo
+  frontend-todo:
+    name: frontend-todo
   
-  backendTodo:
-    name: backendTodo
+  backend-todo:
+    name: backend-todo
 
 volumes:
     mongodb:
