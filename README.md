@@ -6,3 +6,6 @@ In order to make the backend up and running do the following:
 - Run the command `docker-compose up`. It will pull the images from docker hub and start the micro services for backend and mongodb.
 - The backend application will be connected to the database.
 - Visit the http://localhost:8080 and you should see the default page of the backend.
+
+# DevOps phase 2 testing.
+This line is added just to test the CI/CD flow
