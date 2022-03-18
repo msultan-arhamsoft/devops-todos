@@ -24,7 +24,7 @@ jobs:
           npm ci
   push_image_to_Docker_Hub:
       runs-on: ubuntu-latest
-      needs: [build_node_app1]
+      needs: [build_node_app]
       steps:
         - name: checkout repo
           uses: actions/checkout@v2
