@@ -7,7 +7,7 @@ on:
     branches: [ develop ]
   
 jobs:
-  build_node_app:
+  Build_Node_App:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip ci')"
 
@@ -25,10 +25,14 @@ jobs:
           npm install
           npm ci
 
-  push_image_to_Docker_Hub:
+  Push_Image_To_Docker_Hub:
       runs-on: ubuntu-latest
       if: "!contains(github.event.head_commit.message, 'skip ci')"
-      needs: [build_node_app]
+      name: Build Image and Push to registry
+      env:
+        REGISTRY: docker.io
+    
+      needs: [Build_Node_App]
       steps:
         - name: checkout repo
           uses: actions/checkout@v2
@@ -45,7 +49,7 @@ jobs:
           id: generate_vars
           run: |
             # Just Tag
-            IMAGE_TAG=pr-${{ github.event.pull_request.number }}-$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-8)
+            IMAGE_TAG=phase2-$(echo ${{ github.event.head_commit.id }} | cut -c1-8)
             # Just Image name
             IMAGE_NAME=${{ github.repository }}
             #Image ID= Name + Tag
