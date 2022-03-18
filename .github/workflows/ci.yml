@@ -1,4 +1,4 @@
-name: CI-CD
+name: CI
 
 on:
   push:
@@ -92,7 +92,7 @@ jobs:
         - name: Comment on PR - Once completed successfully.
           uses: mshick/add-pr-comment@v1
           env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
           with:
             message: '@${{ github.actor }} Image is available for testing. `docker pull ${{ env.IMAGE }}`'
             allow-repeats: false
@@ -101,8 +101,17 @@ jobs:
           if: failure()
           uses: mshick/add-pr-comment@v1
           env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
           with:
             message: '@${{ github.actor }} The pipeline failed!'
             allow-repeats: false
-    
+
+        - name: Notify Slack
+          uses: 8398a7/action-slack@v3
+          if: always()
+          with:
+            status: ${{ job.status }}
+            fields: repo,author,action,eventName,ref,workflow
+          env:
+            GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
