@@ -79,13 +79,30 @@ jobs:
             echo "Repo from Output: ${{ steps.generate_vars.outputs.image_name }}"
             echo "Image from Env:  ${{ env.IMAGE }}"
             echo "Repo from Env:  ${{ env.REPO }}"
-
-    
         
         - name: Build and push
           uses: docker/build-push-action@v2
           with:
             context: ./
             file: ./Dockerfile
+            pull: true
             push: true
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/devops-backend:phase2-v2
+            tags: ${{ env.IMAGE }}
+
+        - name: Comment on PR
+          uses: mshick/add-pr-comment@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            message: '@${{ github.actor }} Image is available for testing. `docker pull ${{ env.IMAGE }}`'
+            allow-repeats: false
+
+        - name: Notify Failure
+          if: failure()
+          uses: mshick/add-pr-comment@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            message: '@${{ github.actor }} The pipeline failed!'
+            allow-repeats: false
+    
