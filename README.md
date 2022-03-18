@@ -8,4 +8,5 @@ In order to make the backend up and running do the following:
 - Visit the http://localhost:8080 and you should see the default page of the backend.
 
 # DevOps phase 2 testing.
-This line is added just to test the CI/CD flow
+- This line is added just to test the CI/CD flow
+- This line is added to test the pull request for develop branch
