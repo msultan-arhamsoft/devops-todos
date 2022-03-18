@@ -24,7 +24,7 @@ jobs:
           npm ci
   push_image_to_Docker_Hub:
       runs-on: ubuntu-latest
-      needs: [build_node_app]
+      needs: [build_node_app1]
       steps:
         - name: checkout repo
           uses: actions/checkout@v2
@@ -43,4 +43,4 @@ jobs:
             context: ./
             file: ./Dockerfile
             push: true
-            tags: ${{ secrets.DOCKERHUB_USERNAME }}/devops-backend:phase2-v1
+            tags: ${{ secrets.DOCKERHUB_USERNAME }}/devops-backend:phase2-v2
