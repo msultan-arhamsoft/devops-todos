@@ -1,0 +1,106 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+  
+jobs:
+  Build_Node_App:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+
+    strategy:
+      matrix:
+        node-version: [14.x]        
+    steps:
+      - uses: actions/checkout@v2
+      - name: setup node
+        uses: actions/setup-node@master
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: |
+          npm install
+          npm ci
+
+  Build_Push_And_Deploy:
+      runs-on: ubuntu-latest
+      if: "!contains(github.event.head_commit.message, 'skip ci')"
+      name: Build Image and Push to registry
+      env:
+        REGISTRY: docker.io
+    
+      needs: [Build_Node_App]
+      steps:
+        - name: checkout repo
+          uses: actions/checkout@v2
+
+        - name: Generate Version
+          id: generate_version
+          uses: anothrNick/github-tag-action@1.34.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
+            WITH_V: true
+            DRY_RUN: true
+            DEFAULT_BUMP: "patch"
+
+        - name: Generate Variables to be used for DOCKER IMAGES
+          id: generate_vars
+          run: |
+            # Just Tag
+            IMAGE_TAG=phase2-$(echo ${{ github.event.head_commit.id }} | cut -c1-8)
+            # Just Image name
+            IMAGE_NAME=${{ secrets.DOCKERHUB_REPO }}
+            #Image ID= Name + Tag
+            IMAGE_ID=$IMAGE_NAME:$IMAGE_TAG
+            IMAGE_REPO=$REGISTRY/$IMAGE_ID
+            echo "Image: $IMAGE_REPO"
+            echo "::set-output name=image::$IMAGE_REPO"
+            echo "::set-output name=image_name::$IMAGE_NAME"
+            echo REPO=$IMAGE_NAME >> $GITHUB_ENV
+            echo IMAGE=$(echo "$REGISTRY/$IMAGE_ID") >> $GITHUB_ENV
+
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@v1
+
+        - name: Set up Docker Buildx
+          uses: docker/setup-buildx-action@v1
+
+        - name: Login to DockerHub
+          uses: docker/login-action@v1
+          with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+        - name: Echo Output
+          run: |
+            echo "Image from Output: ${{ steps.generate_vars.outputs.image }}"
+            echo "Repo from Output: ${{ steps.generate_vars.outputs.image_name }}"
+            echo "Image from Env:  ${{ env.IMAGE }}"
+            echo "Repo from Env:  ${{ env.REPO }}"
+        
+        - name: Build and push
+          uses: docker/build-push-action@v2
+          with:
+            context: ./
+            file: ./Dockerfile
+            pull: true
+            push: true
+            tags: ${{ env.IMAGE }}
+
+        - name: Push tag
+          uses: anothrNick/github-tag-action@1.34.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            WITH_V: true
+            DEFAULT_BUMP: "patch"
+
+        - name: Notify Slack
+          uses: 8398a7/action-slack@v3
+          if: always()
+          with:
+            status: ${{ job.status }}
+            fields: repo,author,action,eventName,ref,workflow
+          env:
+            GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
