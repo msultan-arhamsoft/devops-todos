@@ -9,4 +9,4 @@ In order to make the backend up and running do the following:
 
 # DevOps phase 2 testing.
 - This line is added just to test the CI/CD flow
-- This line is added to test the pull request for develop branch
+- This line is added to test the pull request for develop branch- v2
