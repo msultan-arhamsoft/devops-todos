@@ -51,7 +51,7 @@ jobs:
             # Just Tag
             IMAGE_TAG=phase2-$(echo ${{ github.event.head_commit.id }} | cut -c1-8)
             # Just Image name
-            IMAGE_NAME=${{ github.repository }}
+            IMAGE_NAME=${{ secrets.DOCKERHUB_REPO }}
             #Image ID= Name + Tag
             IMAGE_ID=$IMAGE_NAME:$IMAGE_TAG
             IMAGE_REPO=$REGISTRY/$IMAGE_ID
@@ -89,7 +89,7 @@ jobs:
             push: true
             tags: ${{ env.IMAGE }}
 
-        - name: Comment on PR
+        - name: Comment on PR - Once completed successfully.
           uses: mshick/add-pr-comment@v1
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
