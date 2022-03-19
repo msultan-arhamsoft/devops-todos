@@ -1,12 +1,12 @@
 name: CI
 
+# Use Case: For development the long lived branch is develop branch, so everyone Developer will be creating the pull request with destination as develop branch, so we need to have the continuous integration for develop branch.
 on:
-  push:
-    branches: [ devops-phase2 ]
   pull_request:
     branches: [ develop ]
-  
+
 jobs:
+  #Job # 1, to build the node js app.
   Build_Node_App:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip ci')"
@@ -24,19 +24,22 @@ jobs:
         run: |
           npm install
           npm ci
-
+  # Job # 2, to build the image and push to registry. Job # 2 depends on Job # 1
   Push_Image_To_Docker_Hub:
       runs-on: ubuntu-latest
+      
+      #If for any reason there is no need to run the CI, can be skipped by adding skip ci key words in the commit message.
       if: "!contains(github.event.head_commit.message, 'skip ci')"
       name: Build Image and Push to registry
       env:
         REGISTRY: docker.io
-    
+      #Job # 2 depends on Job # 1
       needs: [Build_Node_App]
       steps:
         - name: checkout repo
           uses: actions/checkout@v2
-
+        
+        #Inform about CI initialization by adding the Comment on Pull Request
         - name: Initialize Pipeline - COMMENT ON PR
           uses: mshick/add-pr-comment@v1
           env:
@@ -45,6 +48,7 @@ jobs:
             message: "@${{ github.actor }} GitHub Actions has started building this code."
             allow-repeats: false
 
+        # Generate variables to be used for creating and pushing the Images to the Registry
         - name: Generate Variables to be used for DOCKER IMAGES
           id: generate_vars
           run: |
@@ -73,6 +77,7 @@ jobs:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+        #Print variables, just to check if the variables are created correctly.
         - name: Echo Output
           run: |
             echo "Image from Output: ${{ steps.generate_vars.outputs.image }}"
@@ -80,6 +85,7 @@ jobs:
             echo "Image from Env:  ${{ env.IMAGE }}"
             echo "Repo from Env:  ${{ env.REPO }}"
         
+        #Build the image using the Dockerfile, and push to registry.
         - name: Build and push
           uses: docker/build-push-action@v2
           with:
@@ -89,6 +95,7 @@ jobs:
             push: true
             tags: ${{ env.IMAGE }}
 
+        #Comment on Pull Request, once the build process is completed
         - name: Comment on PR - Once completed successfully.
           uses: mshick/add-pr-comment@v1
           env:
@@ -97,6 +104,7 @@ jobs:
             message: '@${{ github.actor }} Image is available for testing. `docker pull ${{ env.IMAGE }}`'
             allow-repeats: false
 
+        # Comment on Pull Request, in case there is some failure while building or pushing the image.
         - name: Notify Failure
           if: failure()
           uses: mshick/add-pr-comment@v1
@@ -106,6 +114,7 @@ jobs:
             message: '@${{ github.actor }} The pipeline failed!'
             allow-repeats: false
 
+        # Send Notification/Message on slack for the failed or suceeded CI Pipeline.
         - name: Notify Slack
           uses: 8398a7/action-slack@v3
           if: always()

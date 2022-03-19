@@ -4,7 +4,7 @@ version: "3"
 services:      
   # backend service serves the backend of the application
   backend:
-    image: mahmoodsultan/devops-backend:phase1
+    image: mahmoodsultan/devops-backend:v0.0.2
     restart: always
     depends_on:
       - mongo
