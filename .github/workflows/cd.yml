@@ -95,12 +95,12 @@ jobs:
             WITH_V: true
             DEFAULT_BUMP: "patch"
 
-        - name: Notify Slack
-          uses: 8398a7/action-slack@v3
-          if: always()
-          with:
-            status: ${{ job.status }}
-            fields: repo,author,action,eventName,ref,workflow
-          env:
-            GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
-            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        # - name: Notify Slack
+        #   uses: 8398a7/action-slack@v3
+        #   if: always()
+        #   with:
+        #     status: ${{ job.status }}
+        #     fields: repo,author,action,eventName,ref,workflow
+        #   env:
+        #     GITHUB_TOKEN: ${{ secrets.ACCOUNT_TOKEN_GITHUB }}
+        #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

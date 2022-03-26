@@ -12,3 +12,7 @@ In order to make the backend up and running do the following:
 - This line is added to test the pull request for develop branch
 - This line is added to test the jenkins file
 - Main branch has the latest code for Jenkinsfile and github workflows files for CI/CD
+
+
+# DevOps Phase 3
+kubectl apply -f k8s
